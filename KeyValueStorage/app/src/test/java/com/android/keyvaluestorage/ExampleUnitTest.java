@@ -1,7 +1,12 @@
 package com.android.keyvaluestorage;
 
+import android.app.Instrumentation;
+import android.content.Context;
+import android.support.test.InstrumentationRegistry;
+
 import com.android.keyvaluestorage.dbmodels.DataType;
 import com.android.keyvaluestorage.dbmodels.KeyValueItem;
+import com.android.keyvaluestorage.helper.DBHelper;
 
 import org.junit.Test;
 
@@ -14,9 +19,15 @@ import java.util.concurrent.TimeUnit;
  */
 public class ExampleUnitTest {
 
+    private Context getTestContext() {
+        Instrumentation instrumentation = new Instrumentation();
+        InstrumentationRegistry.registerInstance(instrumentation, null);
+        return InstrumentationRegistry.getContext();
+    }
+
     @Test
     public void concurrency_isCorrect() throws Exception {
-
+        DBHelper.init(getTestContext());
         ExecutorService exec = Executors.newFixedThreadPool(5);
         for (int i = 0; i < 10; i++) {
             final int finalI = i;
@@ -30,6 +41,7 @@ public class ExampleUnitTest {
         }
         exec.shutdown();
         exec.awaitTermination(50, TimeUnit.SECONDS);
+
     }
 
 }
