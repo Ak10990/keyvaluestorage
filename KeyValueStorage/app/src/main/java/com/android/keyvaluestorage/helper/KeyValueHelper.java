@@ -7,6 +7,10 @@ import com.android.keyvaluestorage.dbmodels.KeyValueItem;
 import com.android.keyvaluestorage.utils.DateUtils;
 import com.android.keyvaluestorage.utils.Logger;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
@@ -199,6 +203,35 @@ public class KeyValueHelper {
     }
 
     /**
+     * JSONObject
+     */
+    public void putKeyValue(String key, JSONObject value) {
+        putJSONObject(key, value);
+    }
+
+    public void putJSONObject(String key, JSONObject value) {
+        KeyValueItem keyValueItem = new KeyValueItem(key, value.toString(), DataType.TYPE_JSONOBJECT.ordinal());
+        keyValueItem.insertOrReplaceToDb();
+    }
+
+    public JSONObject getJSONObject(String key, JSONObject defValue) {
+        int type = DataType.TYPE_JSONOBJECT.ordinal();
+        List<KeyValueItem> list = KeyValueItem.listAll(key, type);
+        if (list != null && list.size() > 0) {
+            try {
+                return new JSONObject(list.get(0).getValue());
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
+        return defValue;
+    }
+
+    public JSONObject getKeyValue(String key, JSONObject defValue) {
+        return getJSONObject(key, defValue);
+    }
+
+    /**
      * String List
      */
     public void putKeyValue(String key, List<String> value) {
@@ -226,6 +259,26 @@ public class KeyValueHelper {
         return getStringList(key, defValues);
     }
 
+    /**
+     * Object
+     */
+    public void putKeyValue(String key, Object value) {
+        KeyValueItem keyValueItem = new KeyValueItem(key, value.toString(), DataType.TYPE_OTHER.ordinal());
+        keyValueItem.insertOrReplaceToDb();
+    }
+
+    public Object getKeyValue(String key) {
+        List<KeyValueItem> list = KeyValueItem.listAll(key);
+        if (list != null && list.size() > 0) {
+            return list.get(0);
+        }
+        return null;
+    }
+
+    public void clear() {
+        KeyValueItem.deleteAllFromDatabase();
+    }
+
     public void delete(String key) {
         if (!TextUtils.isEmpty(key)) {
             KeyValueItem.deleteFromDatabase(key);
@@ -234,16 +287,68 @@ public class KeyValueHelper {
         }
     }
 
+    public void delete(Class<?> clazz) {
+        int type = getType(clazz);
+        if (type != -1) {
+            KeyValueItem.deleteAllFromDatabase(type);
+        }
+    }
+
+    public List<KeyValueItem> listAll() {
+        return KeyValueItem.listAll();
+    }
+
+    public List<KeyValueItem> list(Class<?> clazz) {
+        int type = getType(clazz);
+        if (type != -1) {
+            return KeyValueItem.listAll(type);
+        }
+        return null;
+    }
+
     public long getCount() {
         return KeyValueItem.count();
     }
 
-   /* public long getCount(Class<?> clazz) {
+    public long getCount(Class<?> clazz) {
         int type = getType(clazz);
         if (type != -1) {
             return KeyValueItem.count(type);
         }
         return 0;
-    }*/
+    }
+
+    private int getType(Class<?> clazz) {
+        int type = -1;
+        if (clazz.equals(String.class)) {
+            type = DataType.TYPE_STRING.ordinal();
+        } else if (clazz.equals(Boolean.class)) {
+            type = DataType.TYPE_BOOLEAN.ordinal();
+        } else if (clazz.equals(Integer.class)) {
+            type = DataType.TYPE_INT.ordinal();
+        } else if (clazz.equals(Short.class)) {
+            type = DataType.TYPE_SHORT.ordinal();
+        } else if (clazz.equals(Long.class)) {
+            type = DataType.TYPE_LONG.ordinal();
+        } else if (clazz.equals(Byte.class)) {
+            type = DataType.TYPE_BYTE.ordinal();
+        } else if (clazz.equals(Float.class)) {
+            type = DataType.TYPE_FLOAT.ordinal();
+        } else if (clazz.equals(Double.class)) {
+            type = DataType.TYPE_DOUBLE.ordinal();
+        } else if (clazz.equals(Character.class)) {
+            type = DataType.TYPE_CHAR.ordinal();
+        } else if (clazz.equals(Date.class)) {
+            type = DataType.TYPE_DATE.ordinal();
+        } else if (clazz.equals(ArrayList.class)) {
+            type = DataType.TYPE_STRINGLIST.ordinal();//TOdO Check string
+        } else if (clazz.equals(JSONObject.class)) {
+            type = DataType.TYPE_JSONOBJECT.ordinal();
+        } else {
+            Logger.w("This class is not supported yet.");
+        }
+
+        return type;
+    }
 
 }

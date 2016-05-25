@@ -139,6 +139,13 @@ public class KeyValueItem extends BaseItem {
         return DBHelper.getInstance().listResult(KeyValueItem.class, queryBuilder.list());
     }
 
+    public static List<KeyValueItem> listAll(String key) {
+        QueryBuilder queryBuilder = new QueryBuilder();
+        queryBuilder.select(KeyValueItem.TABLENAME);
+        queryBuilder.where(KeyValueItem.Columns.KEY.columnName, key, true);
+        return DBHelper.getInstance().listResult(KeyValueItem.class, queryBuilder.list());
+    }
+
     public static List<KeyValueItem> listAll(int type) {
         QueryBuilder queryBuilder = new QueryBuilder();
         queryBuilder.select(KeyValueItem.TABLENAME);
@@ -161,11 +168,10 @@ public class KeyValueItem extends BaseItem {
      */
     @Override
     public KeyValueItem readFromCursor(Cursor cursor, int offset) {
-        KeyValueItem message = new KeyValueItem(
+        return new KeyValueItem(
                 cursor.isNull(Columns.KEY.ordinal) ? null : cursor.getString(Columns.KEY.ordinal),
                 cursor.isNull(Columns.VALUE.ordinal) ? null : cursor.getString(Columns.VALUE.ordinal),
                 cursor.isNull(Columns.TYPE.ordinal) ? null : cursor.getInt(Columns.TYPE.ordinal));
-        return message;
     }
 
     /**

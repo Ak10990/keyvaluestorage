@@ -11,7 +11,7 @@ import java.util.List;
 public class Logger {
 
     private static boolean DEBUG = true;
-    private static final String LOG_TAG = "com.keyvaluestorage";
+    private static final String LOG_TAG = "com.android.kvstorage";
 
     public static void d(String message) {
         if (DEBUG) {
